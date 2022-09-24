@@ -6,11 +6,16 @@
     let initialColors;
 
 
+
+
+
+
+
+
 // Functions //
 
 
 //  Color generator without library(training)
-
 // function generateHex(){
 // const letters = "0123456789ABCDEF";
 // let hash = "#";
@@ -19,18 +24,17 @@
 // }
 //     return hash;    
 // }
-
 // let randomHex = generateHex();
 
 
-//Color generator using lib
+//Color generator using Chroma lib
 function generateHex(){
     const hexColor = chroma.random();
     return hexColor;
 }
 
 
-
+//Assign random color to div and div h2
 function randomColors(){
     colorDivs.forEach((div, index) => {
         const hexText = div.children[0];
@@ -39,7 +43,23 @@ function randomColors(){
         //Add the color to bg and text
         div.style.background = randomColor;
         hexText.innerText = randomColor;
+
+        //Check for contrast 
+        checkTextContrast(randomColor, hexText);
     });
 }
-
 randomColors();
+
+//Check Text Contrast using Chroma lib
+
+function checkTextContrast(color, text) {
+    const luminance = chroma(color).luminance();
+    if (luminance > 0.5){
+        text.style.color = "black";
+    } else {
+        text.style.color = "white";
+    }
+};
+
+
+
