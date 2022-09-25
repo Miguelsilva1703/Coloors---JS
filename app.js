@@ -46,9 +46,14 @@ function generateHex(){
 
 //Assign random color to div and div h2
 function randomColors(){
+    //Initial color empty array
+    initialColors = [];
+
     colorDivs.forEach((div, index) => {
         const hexText = div.children[0];
         const randomColor = generateHex();
+
+        initialColors.push(chroma(randomColor).hex())
 
         //Add the color to bg and text
         div.style.background = randomColor;
@@ -95,6 +100,10 @@ function colorizeSliders(color, hue, brightness, saturation){
     saturation.style.backgroundImage = `linear-gradient(to right,${scaleSat(0)}, ${scaleSat(1)})`;
     brightness.style.backgroundImage = `linear-gradient(to right, ${scaleBright(0)}, ${scaleBright(0.5)}, ${scaleBright(1)})`;
     hue.style.backgroundImage = `linear-gradient(to right, rgb(204,75,75), rgb(204, 204, 75), rgb(74,204,74), rgb(75,204,204), rgb(75,75,204), rgb(204,75,204), rgb(204,75, 75) )`
+
+    hue.value = color.hsl()[0];
+    brightness.value = color.hsl()[2];
+    saturation.value = color.hsl()[1];
 }
 
 
@@ -107,7 +116,7 @@ function hslControls(e){
     const brightness = sliders[1];
     const saturation = sliders[2];
 
-    const bgColor = colorDivs[index].querySelector("h2").innerText;
+    const bgColor = initialColors[index];
 
 
     let color = chroma(bgColor)
@@ -115,7 +124,9 @@ function hslControls(e){
         .set("hsl.l", brightness.value)
         .set("hsl.h", hue.value);
 
-    colorDivs[index].style.backgroundColor = color;    
+    colorDivs[index].style.backgroundColor = color;
+    
+    colorizeSliders();
 }
 
 
@@ -133,6 +144,9 @@ function updateTextUi(index){
         checkTextContrast(color, icon);
     }
 }
+
+
+
 
 
 
