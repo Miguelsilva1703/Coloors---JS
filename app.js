@@ -5,12 +5,17 @@
     const currentHexes = document.querySelectorAll(".color h2");
     const popup = document.querySelector('.copy-container');
     const adjustButton = document.querySelectorAll(".adjust");
+    const lockButton = document.querySelectorAll(".lock");
     const closeAdjustments = document.querySelectorAll(".close-adjustment");
     const sliderContainers = document.querySelectorAll(".sliders");
     let initialColors;
 
 
 // EVENT LISTENERS
+
+//Generate random palete button
+generateBtn.addEventListener("click", randomColors);
+
 //Get each individual slider and attach event listener to input 
 sliders.forEach(slider => {
     slider.addEventListener("input", hslControls);
@@ -29,27 +34,29 @@ currentHexes.forEach(hex => {
         copyToClipboard(hex);
     })
 })
-
 popup.addEventListener('transitionend', () => {
     const popupBox = popup.children[0];
     popup.classList.remove('active');
     popupBox.classList.remove('active');
 })
-
+//Open adjustment panel(toggle)
 adjustButton.forEach((button, index) => {
     button.addEventListener("click", () => {
         openAdjustmentPanel(index);
     })
 })
-
+//Close adjustment panel(x)
 closeAdjustments.forEach((button, index) => {
     button.addEventListener("click", () =>{
         closeAdjustmentPanel(index)
     })
 })
 
-
-
+lockButton.forEach((button, index) => {
+    button.addEventListener("click", e => {
+      lockLayer(e, index);
+    });
+  });
 
 
 
@@ -58,44 +65,39 @@ closeAdjustments.forEach((button, index) => {
 
 // Functions //
 
-
-//  Color generator without library(training)
-// function generateHex(){
-// const letters = "0123456789ABCDEF";
-// let hash = "#";
-// for (let i = 0; i < 6; i++){
-//     hash += letters[Math.floor(Math.random() * 16)]
-// }
-//     return hash;    
-// }
-// let randomHex = generateHex();
-
-
 //Color generator using Chroma lib
 function generateHex(){
     const hexColor = chroma.random();
     return hexColor;
 }
 
-
 //Assign random color to div and div h2
-function randomColors(){
-    //Initial color empty array
+function randomColors() {
+    //Set Initial colors array
     initialColors = [];
 
     colorDivs.forEach((div, index) => {
         const hexText = div.children[0];
         const randomColor = generateHex();
+        const icons = colorDivs[index].querySelectorAll(".controls button")
 
-        initialColors.push(chroma(randomColor).hex())
+        //Adding/pushing colors(hex) to array
+        if(div.classList.contains("locked")){
+            initialColors.push(hexText.innerText);
+            return;
+        }else{
+            initialColors.push(chroma(randomColor).hex());
+        }
+        
 
         //Add the color to bg and text
         div.style.background = randomColor;
         hexText.innerText = randomColor;
 
-        //Check for contrast 
+        //Check for contrast for both text and buttons
         checkTextContrast(randomColor, hexText);
-
+       
+       
         //Initial colorize sliders
         const color = chroma(randomColor);
         const sliders = div.querySelectorAll(".sliders input");
@@ -104,6 +106,13 @@ function randomColors(){
         const saturation = sliders[2];
 
         colorizeSliders(color, hue, brightness, saturation);
+    });
+
+    
+    //Check for button contrast
+    adjustButton.forEach((button, index) => {
+    checkTextContrast(initialColors[index], button);
+    checkTextContrast(initialColors[index], lockButton[index]);
     });
 }
 
@@ -200,7 +209,17 @@ function closeAdjustmentPanel(index){
     sliderContainers[index].classList.remove('active');
 }
 
-
+function lockLayer(e, index) {
+    const lockSVG = e.target.children[0];
+    const activeBg = colorDivs[index];
+    activeBg.classList.toggle("locked");
+  
+    if (lockSVG.classList.contains("fa-lock-open")) {
+      e.target.innerHTML = '<i class="fas fa-lock"></i>';
+    } else {
+      e.target.innerHTML = '<i class="fas fa-lock-open"></i>';
+    }
+  }
 
 
 //Funtions being called
