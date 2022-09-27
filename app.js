@@ -225,7 +225,7 @@ function lockLayer(e, index) {
 
 //Implement save to palette and Local Storage Stuff
 const saveBtn = document.querySelector('.save');
-const submitSave = document.querySelector('.submit-save');
+let submitSave = document.querySelector('.submit-save');
 const closeSave = document.querySelector(".close-save");
 const saveContainer = document.querySelector(".save-container");
 const saveInput = document.querySelector(".save-container input");
@@ -233,6 +233,7 @@ const saveInput = document.querySelector(".save-container input");
 //Event Listeners
 saveBtn.addEventListener("click", openPalette);
 closeSave.addEventListener("click", closePalette);
+submitSave.addEventListener("click", savePalette);
 
 //Functions
 function openPalette(e){
@@ -246,6 +247,36 @@ function closePalette(e){
     saveContainer.classList.remove("active");
     popup.classList.add("remove");
 }
+
+function savePalette(e){
+    saveContainer.classList.remove("active");
+    popup.classList.remove("active");
+    const name = saveInput.value;
+    const colors = [];
+    currentHexes.forEach(hex => {
+        colors.push(hex.innerText);
+    });
+    //Generate Object
+    let paletteNr = savedPalettes.length;
+    const paletteObj = {name, colors, nr: paletteNr}
+    savedPalettes.push(paletteObj);
+
+    //Save to Local Storage
+    saveToLocal(paletteObj);
+    saveInput.value = "";
+}
+
+function saveToLocal(paletteObj){
+    let localPalettes;
+    if(localStorage.getItem("palettes") === null){
+        localPalettes = [];
+    }else{
+        localPalettes = JSON.parse(localStorage.getItem("palettes"));
+    }
+    localPalettes.push(paletteObj);
+    localStorage.setItem("palettes", JSON.stringify(localPalettes));
+}
+
 
 
 
