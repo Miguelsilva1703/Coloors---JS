@@ -1,14 +1,16 @@
 // Global selections and variables //
-    const colorDivs = document.querySelectorAll(".color");
-    const generateBtn = document.querySelector(".generate");
-    const sliders = document.querySelectorAll("input[type=range]");
-    const currentHexes = document.querySelectorAll(".color h2");
-    const popup = document.querySelector('.copy-container');
-    const adjustButton = document.querySelectorAll(".adjust");
-    const lockButton = document.querySelectorAll(".lock");
-    const closeAdjustments = document.querySelectorAll(".close-adjustment");
-    const sliderContainers = document.querySelectorAll(".sliders");
-    let initialColors;
+const colorDivs = document.querySelectorAll(".color");
+const generateBtn = document.querySelector(".generate");
+const sliders = document.querySelectorAll("input[type=range]");
+const currentHexes = document.querySelectorAll(".color h2");
+const popup = document.querySelector('.copy-container');
+const adjustButton = document.querySelectorAll(".adjust");
+const lockButton = document.querySelectorAll(".lock");
+const closeAdjustments = document.querySelectorAll(".close-adjustment");
+const sliderContainers = document.querySelectorAll(".sliders");
+let initialColors;
+//Local Storage
+let savedPalettes = [];
 
 
 // EVENT LISTENERS
@@ -219,7 +221,34 @@ function lockLayer(e, index) {
     } else {
       e.target.innerHTML = '<i class="fas fa-lock-open"></i>';
     }
-  }
+}
+
+//Implement save to palette and Local Storage Stuff
+const saveBtn = document.querySelector('.save');
+const submitSave = document.querySelector('.submit-save');
+const closeSave = document.querySelector(".close-save");
+const saveContainer = document.querySelector(".save-container");
+const saveInput = document.querySelector(".save-container input");
+
+//Event Listeners
+saveBtn.addEventListener("click", openPalette);
+closeSave.addEventListener("click", closePalette);
+
+//Functions
+function openPalette(e){
+    const popup = saveContainer.children[0];
+    saveContainer.classList.add("active");
+    popup.classList.add("active");
+}
+
+function closePalette(e){
+    const popup = saveContainer.children[0];
+    saveContainer.classList.remove("active");
+    popup.classList.add("remove");
+}
+
+
+
 
 
 //Funtions being called
