@@ -26,7 +26,7 @@ sliders.forEach(slider => {
 //Update Div text
 colorDivs.forEach((div, index) => {
     div.addEventListener("change", () => {
-        updateTextUi(index);
+        updateTextUI(index);
     });
 });
 
@@ -109,7 +109,8 @@ function randomColors() {
 
         colorizeSliders(color, hue, brightness, saturation);
     });
-
+    //Reset Inputs
+    resetInputs();
     
     //Check for button contrast
     adjustButton.forEach((button, index) => {
@@ -145,10 +146,6 @@ function colorizeSliders(color, hue, brightness, saturation){
     saturation.style.backgroundImage = `linear-gradient(to right,${scaleSat(0)}, ${scaleSat(1)})`;
     brightness.style.backgroundImage = `linear-gradient(to right, ${scaleBright(0)}, ${scaleBright(0.5)}, ${scaleBright(1)})`;
     hue.style.backgroundImage = `linear-gradient(to right, rgb(204,75,75), rgb(204, 204, 75), rgb(74,204,74), rgb(75,204,204), rgb(75,75,204), rgb(204,75,204), rgb(204,75, 75) )`
-
-    hue.value = color.hsl()[0];
-    brightness.value = color.hsl()[2];
-    saturation.value = color.hsl()[1];
 }
 
 
@@ -171,12 +168,13 @@ function hslControls(e){
 
     colorDivs[index].style.backgroundColor = color;
     
+    //Colorize inputs/sliders
     colorizeSliders(color, hue, brightness, saturation);
 }
 
 
 //Update text UI
-function updateTextUi(index){
+function updateTextUI(index){
     const activeDiv = colorDivs[index];
     const color = chroma(activeDiv.style.backgroundColor);
     const textHex = activeDiv.querySelector("h2");
@@ -190,6 +188,26 @@ function updateTextUi(index){
     }
 }
 
+function resetInputs() {
+    const sliders = document.querySelectorAll(".sliders input");
+    sliders.forEach(slider => {
+      if (slider.name === "hue") {
+        const hueColor = initialColors[slider.getAttribute("data-hue")];
+        const hueValue = chroma(hueColor).hsl()[0];
+        slider.value = Math.floor(hueValue);
+      }
+      if (slider.name === "brightness") {
+        const brightColor = initialColors[slider.getAttribute("data-bright")];
+        const brightValue = chroma(brightColor).hsl()[2];
+        slider.value = Math.floor(brightValue * 100) / 100;
+      }
+      if (slider.name === "saturation") {
+        const satColor = initialColors[slider.getAttribute("data-sat")];
+        const satValue = chroma(satColor).hsl()[1];
+        slider.value = Math.floor(satValue * 100) / 100;
+      }
+    });
+}
 
 function copyToClipboard(hex){
     navigator.clipboard.writeText(hex.innerText);
@@ -264,7 +282,15 @@ function savePalette(e){
     });
 
     //Generate Object
-    let paletteNr = savedPalettes.length;
+    let paletteNr;
+    const paletteObjects = JSON.parse(localStorage.getItem("palettes"));
+    if(paletteObjects){
+        paletteNr = palleteObjects.length;
+    }else{
+        paletteNr = savedPalettes.length;
+    }
+
+
     const paletteObj = {name, colors, nr: paletteNr}
     savedPalettes.push(paletteObj);
 
@@ -289,12 +315,26 @@ function savePalette(e){
     paletteBtn.classList.add(paletteObj.nr);
     paletteBtn.innerText = "Select";
 
+    //Attach event to lib btn
+    paletteBtn.addEventListener("click", (e) => {
+        closeLibrary();
+        const paletteIndex = e.target.classList[1];
+        initialColors = [];
+        savedPalettes[paletteIndex].colors.forEach((color, index) => {
+            initialColors.push(color);
+            colorDivs[index].style.backgroundColor = color;
+            const text = colorDivs[index].children[0];
+            checkTextContrast(color,text);
+            updateTextUI(index);
+        });
+        resetInputs();
+    });
+
     //Append to library
     palette.appendChild(title);
     palette.appendChild(preview);
     palette.appendChild(paletteBtn);
     libraryContainer.children[0].appendChild(palette);
-
 }
 
 function openLibrary(e){
@@ -309,6 +349,7 @@ function closeLibrary(e){
     popup.classList.remove("active");
 }
 
+
 function saveToLocal(paletteObj){
     let localPalettes;
     if(localStorage.getItem("palettes") === null){
@@ -320,10 +361,55 @@ function saveToLocal(paletteObj){
     localStorage.setItem("palettes", JSON.stringify(localPalettes));
 }
 
+function getLocal() {
+    if (localStorage.getItem("palettes") === null) {
+        localPalettes  = [];
+    }else {
+        const paletteObjects = JSON.parse(localStorage.getItem("palettes"));
+        paletteObjects.forEach(paletteObj => {
+        //Generate palette for Library
+        const palette = document.createElement("div");
+        palette.classList.add("custom-palette");
+        const title = document.createElement("h4");
+        title.innerText = paletteObj.name;
+        const preview = document.createElement("div");
+        preview.classList.add("small-preview");
+        paletteObj.colors.forEach(smallColor => {
+            const smallDiv = document.createElement("div")
+            smallDiv.style.backgroundColor = smallColor;
+            preview.appendChild(smallDiv);
+        });
+        const paletteBtn = document.createElement("button");
+        paletteBtn.classList.add("pick-palette-btn");
+        paletteBtn.classList.add(paletteObj.nr);
+        paletteBtn.innerText = "Select";
 
+        //Attach event to lib btn
+        paletteBtn.addEventListener("click", (e) => {
+            closeLibrary();
+            const paletteIndex = e.target.classList[1];
+            initialColors = [];
+            paletteObjects[paletteIndex].colors.forEach((color, index) => {
+                initialColors.push(color);
+                colorDivs[index].style.backgroundColor = color;
+                const text = colorDivs[index].children[0];
+                checkTextContrast(color,text);
+                updateTextUI(index);
+            });
+            resetInputs();
+        });
+        //Append to library
+        palette.appendChild(title);
+        palette.appendChild(preview);
+        palette.appendChild(paletteBtn);
+        libraryContainer.children[0].appendChild(palette);
+        });
+    }
+}
 
 
 
 
 //Funtions being called
+getLocal();
 randomColors(); 
