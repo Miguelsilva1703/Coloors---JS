@@ -285,7 +285,7 @@ function savePalette(e){
     let paletteNr;
     const paletteObjects = JSON.parse(localStorage.getItem("palettes"));
     if(paletteObjects){
-        paletteNr = palleteObjects.length;
+        paletteNr = paletteObjects.length;
     }else{
         paletteNr = savedPalettes.length;
     }
@@ -366,6 +366,8 @@ function getLocal() {
         localPalettes  = [];
     }else {
         const paletteObjects = JSON.parse(localStorage.getItem("palettes"));
+        //Create copy of local storage
+        savedPalettes = [...paletteObjects];
         paletteObjects.forEach(paletteObj => {
         //Generate palette for Library
         const palette = document.createElement("div");
